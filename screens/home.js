@@ -12,17 +12,18 @@ import { dbRef,fbAppId,uid } from '../constants/constants'
 import MapView from 'react-native-maps';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import firebase from '../config/firebase'
-const KEY = "-L_-FgYcYrWeqoE6dtO8"
+var KEY;
 const GEOLOCATION_OPTIONS = { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 };
 
 export default class Maps extends React.Component {
   constructor(props){
     super(props)
     this.state={
-      location: { coords: {latitude: 0, longitude: 0}},
+      
     }
     this._getLocationAsync = this._getLocationAsync.bind(this)
-  }
+    // this.locationChanged = this.locationChanged.bind(this)
+  }  
 
   static navigationOptions = {
     drawerLabel: 'Home',
@@ -31,21 +32,7 @@ export default class Maps extends React.Component {
     ),
   };
 
-  componentWillMount() {
-    Location.watchPositionAsync(GEOLOCATION_OPTIONS, this.locationChanged);
-  }
-
-  locationChanged = (location) => {
-    region = {
-      latitude: location.coords.latitude,
-      longitude: location.coords.longitude,
-      latitudeDelta: 0.1,
-      longitudeDelta: 0.05,
-    },
-    this.setState({location, region})
-  }
-
-  componentDidMount(){
+  async componentDidMount(){
     
     //Getting Uid From Props
     const uid = this.props.navigation.state.params.uid
@@ -57,12 +44,20 @@ export default class Maps extends React.Component {
           const database = firebase.database();
           const userRef = database.ref('userInfo');
           let arr = []
-          let brr = []
           userRef
-          .on('child_added', function (data) {
-            arr.push(data.val())
+          .on('value', (snap)=>{
+            userInfo =[];
+            data = snap.val()
+            arr = [];
+            for(let i in data){
+              if(uid === data[i].uid){
+                KEY = i;
+                this.setState({currentUser:data[i]})
+              }
+              arr.push(data[i])
+            }
+            this.setState({userInfo:arr})
           })
-          this.setState({userInfo:arr})
             if (Platform.OS === 'android' && !Constants.isDevice) {
               this.setState({
               errorMessage: 'Oops, this will not work on Sketch in an Android emulator. Try it on your device!',
@@ -71,89 +66,74 @@ export default class Maps extends React.Component {
               this._getLocationAsync();
           }
         }
+        await Location.watchPositionAsync(GEOLOCATION_OPTIONS, this.locationChanged);
                
         
 }
 
-static getDerivedStateFromProps(props, state){
-  const members = props.navigation.state.params.members
-  const userInfo = state.userInfo;
-  const selectedMembers = [];
-  userInfo && members && userInfo.map(
-    (value,index)=>{
-      if(members.includes((value.uid))){
-        selectedMembers.push(value)
-      }
+locationChanged = async (location) => {
+  region = {
+    latitude: location.coords.latitude,
+    longitude: location.coords.longitude,
+    latitudeDelta: 0.1,
+    longitudeDelta: 0.05,
+  }
+  this.setState({location, region})
+  const database = firebase.database();
+    let coordinates = {
+      longitude : location.coords.longitude,
+      latitude : location.coords.latitude
     }
-  )
-  return ({selectedMumbers :selectedMembers})
+  await KEY && database.ref(`userInfo/${KEY}`).update({coordinates:coordinates})
 }
 
+
 _getLocationAsync = async () => {
-    
+    const database = firebase.database();
     let { status } = await Permissions.askAsync(Permissions.LOCATION);
     const locationSerivceCheck = await Location.hasServicesEnabledAsync();
     if (status !== 'granted') {
       return  'Permission to access location was denied'
     }else if(locationSerivceCheck){
         let location = await Location.getCurrentPositionAsync();
-      let coordinates = {
-        latitude : location.coords.longitude,
-        longitude : location.coords.latitude
-      };
-      const database = firebase.database();
-       return database.ref(`userInfo/${KEY}`).update({coordinates:coordinates})
+        let coordinates = {
+          longitude : location.coords.longitude,
+          latitude : location.coords.latitude
+        }
+       await KEY && database.ref(`userInfo/${KEY}`).update({coordinates:coordinates})
     }
   };
 
 render() {
-  console.log(region)
-  const {region,selectedMumbers} =this.state
-  console.log("render Chala",this.state)
-    return (
+  const {currentUser,selectedMembers,location,region} = this.state;
+  console.log(this.state)
+  return (
         <View style={{
             flex: 1
             }}>
+            {
+            location && region && currentUser &&
             <MapView 
               style={{
               flex: 1
               }}
-              initialRegion={{
-                latitude: 24.8838,
-                longitude: 67.0654,
-                latitudeDelta: 0.0072,
-                longitudeDelta: 0.0051
-              }}>
+              initialRegion={region}>
               <MapView.Marker
-                  coordinate={{
-                  latitude: 24.8838,
-                  longitude: 67.0654,
-                  }}
-                  />
-              {selectedMumbers && selectedMumbers.map((value,index)=>{
-                console.log('chheck *****',value.coordinates.latitude)
-                const latitude = +value.coordinates.latitude
-                const longitude = +value.coordinates.longitude
-                return(
-                <MapView.Marker
                 coordinate={{
-                  latitude: latitude,
-                  longitude: longitude,
-                  }}
-                  />)
-              })
-              }
-            </MapView>
+                latitude: location.coords.latitude,
+                longitude: location.coords.longitude,
+                }}
+                image={currentUser.displayPicture}
+                description={currentUser.displayName}
+              />
+              </MapView>
+            }
+            {!location && !region &&
+            <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+              <Text>Turn On Your Location Services On High AccuracyAnd If It Is Already On Try Reloading App</Text>
+            </View>
+            }
           </View>
     );
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
