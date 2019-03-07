@@ -16,7 +16,6 @@ import {
 import firebase from '../config/firebase'
 import { dbRef } from '../constants/constants'
 import _ from 'lodash';
-    
 
 export default class Circle extends React.Component {
   constructor(props){
@@ -66,6 +65,10 @@ export default class Circle extends React.Component {
     }    
 }
 
+// getDerivedStateFromProps(props,state){
+// 	return {circle : props.navigation.state.params.circle}
+// }
+
 deleteCircle(value){
   const {uid} = this.state
   const database = firebase.database();
@@ -90,8 +93,21 @@ leaveCircle(value){
       )
 }
 
+removeMember(value,renderingUser){
+  const uid = renderingUser.uid
+  const database = firebase.database();
+  const index=value.members.indexOf(uid)
+  const updatedArray = value.members.splice(index,1);
+  database.ref(`circles/${value.key}`).update({ members: value.members })
+  .then(
+    ()=>{
+      this.props.navigation.navigate("Home",uid)
+    }
+  )
+}
+
 render() {
-    const { userInfo,circle,admin} = this.state
+    const { userInfo,circle,admin,uid} = this.state
     return (
         <View style={{flex: 1}}>
             {
@@ -109,14 +125,31 @@ render() {
                     uid: value
                 });
                 return(
-                    <TouchableOpacity>
-                        {renderingUser &&
+                    <View>
+                        {renderingUser && circle.isOwner && renderingUser.uid !== uid &&
+                        <View>
+                        <Card.Title
+                            title={renderingUser.displayName}
+                            left={(props) => <Avatar.Icon {...props} icon="face" />}
+                            right={(props) => <TouchableOpacity onPress={() => this.removeMember(circle,renderingUser)}><Avatar.Icon {...props} icon="delete" /></TouchableOpacity>}
+                            />
+                        </View>
+                        }
+                      <TouchableOpacity>
+                        {renderingUser && !circle.isOwner &&
                         <Card.Title
                             title={renderingUser.displayName}
                             left={(props) => <Avatar.Icon {...props} icon="face" />}
                         />
                         }
-                    </TouchableOpacity>
+                        {renderingUser && circle.isOwner && renderingUser.uid === uid &&
+                        <Card.Title
+                            title={renderingUser.displayName}
+                            left={(props) => <Avatar.Icon {...props} icon="face" />}
+                        />
+                        }
+                      </TouchableOpacity>
+                    </View>
                 )
             })
             }

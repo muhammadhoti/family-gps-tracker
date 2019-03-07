@@ -13,8 +13,7 @@ import {
         Button
         } from 'react-native-paper';
 import firebase from '../config/firebase'
-import { dbRef } from '../constants/constants'
-    
+import { dbRef } from '../constants/constants'    
 
 export default class TrackCircle extends React.Component {
   constructor(props){
@@ -43,7 +42,7 @@ export default class TrackCircle extends React.Component {
         let arr = []
         circleRef
         .on('value', (snap)=>{
-          const {uid} = this.state
+          const uid = this.props.navigation.state.params.uid
           let {currentUserCircles} = this.state
           currentUserCircles =[];
           data = snap.val()
@@ -65,7 +64,7 @@ export default class TrackCircle extends React.Component {
 
 trackCircle(value){
     const {uid} = this.state
-    this.props.navigation.navigate("Home",{uid:uid,members:value.members})
+    this.props.navigation.navigate("Tracking_Screen",{uid:uid,circle:value})
 }
 
 render() {

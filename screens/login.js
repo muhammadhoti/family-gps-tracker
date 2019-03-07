@@ -8,21 +8,22 @@ export default class Login extends React.Component {
   constructor(props){
     super(props)
     this.state={
-        usersList : [],
+        
     }
   }
   
     componentDidMount(){
-        fetch(`${dbRef}/usersList.json`)
-        .then(data => {
-        return data.json();
-        })
-        .then(data2 => {
-        // console.log(data2);
-        for(let i in data2){
-          this.state.usersList.push(data2[i].uid);
-        }
-    })
+    const database = firebase.database();
+          const userRef = database.ref('usersList');
+          let arr = [];
+          userRef
+          .on('value', (snap)=>{
+            data = snap.val()
+            for(let i in data){
+              arr.push(data[i].uid);
+            }
+            this.setState({usersList:arr})
+          })
     }
   
     async login() {
@@ -48,6 +49,7 @@ export default class Login extends React.Component {
           const userData = await facebookProfileData.user.providerData[0];
           await AsyncStorage.setItem('uid', userData.uid);
           const uid = await userData.uid
+          if(usersList){
           const userCheck = await usersList.includes(uid)
           await userCheck ? this.props.navigation.navigate("Home",{uid})
            :
@@ -61,14 +63,14 @@ export default class Login extends React.Component {
                 userListRef.set({uid})
             })
             .then(
-                ()=>{
-                        this.props.navigation.navigate("Home",uid)
-                            }
+                ()=>{this.props.navigation.navigate("Home",uid)}
             )
           return Promise.resolve({type: 'success'});
+          }
+          
         }
         case 'cancel': {
-          
+          alert("Login Failed Try Again")
           return Promise.reject({type: 'cancel'});
         }
       }

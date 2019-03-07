@@ -13,8 +13,7 @@ import {
         Button
         } from 'react-native-paper';
 import firebase from '../config/firebase'
-import { dbRef,fbAppId } from '../constants/constants'
-    
+import { dbRef,fbAppId } from '../constants/constants'    
 
 export default class MyCircle extends React.Component {
   constructor(props){
@@ -43,7 +42,7 @@ export default class MyCircle extends React.Component {
         let arr = []
         circleRef
         .on('value', (snap)=>{
-          const {uid} = this.state
+          const uid = this.props.navigation.state.params.uid
           let{currentUserCircles} = this.state
           currentUserCircles =[];
           data = snap.val()

@@ -12,6 +12,12 @@ import { dbRef,fbAppId,uid } from '../constants/constants'
 import MapView from 'react-native-maps';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import firebase from '../config/firebase'
+import {
+  Appbar,
+  Headline,
+  TextInput,
+  Button
+  } from 'react-native-paper';
 var KEY;
 const GEOLOCATION_OPTIONS = { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 };
 
@@ -33,7 +39,6 @@ export default class Maps extends React.Component {
   };
 
   async componentDidMount(){
-    
     //Getting Uid From Props
     const uid = this.props.navigation.state.params.uid
         this.setState({
@@ -46,8 +51,8 @@ export default class Maps extends React.Component {
           let arr = []
           userRef
           .on('value', (snap)=>{
-            userInfo =[];
             data = snap.val()
+            arr = null;
             arr = [];
             for(let i in data){
               if(uid === data[i].uid){
@@ -66,9 +71,7 @@ export default class Maps extends React.Component {
               this._getLocationAsync();
           }
         }
-        await Location.watchPositionAsync(GEOLOCATION_OPTIONS, this.locationChanged);
-               
-        
+        // await Location.watchPositionAsync(GEOLOCATION_OPTIONS, this.locationChanged);
 }
 
 locationChanged = async (location) => {
@@ -105,33 +108,37 @@ _getLocationAsync = async () => {
   };
 
 render() {
-  const {currentUser,selectedMembers,location,region} = this.state;
-  console.log(this.state)
+  const {currentUser,location,region} = this.state;
   return (
         <View style={{
             flex: 1
             }}>
+            <Appbar.Header>
+                <Appbar.Content
+                title="Welcome To Family GPS Tracker"
+                />
+            </Appbar.Header>
             {
-            location && region && currentUser &&
+            currentUser &&
             <MapView 
               style={{
               flex: 1
               }}
-              initialRegion={region}>
+              initialRegion={{
+                latitude: currentUser.coordinates.latitude,
+                longitude: currentUser.coordinates.longitude,
+                latitudeDelta: 0.0072,
+                longitudeDelta: 0.0051
+              }}>
               <MapView.Marker
                 coordinate={{
-                latitude: location.coords.latitude,
-                longitude: location.coords.longitude,
+                latitude: currentUser.coordinates.latitude,
+                longitude: currentUser.coordinates.longitude,
                 }}
                 image={currentUser.displayPicture}
                 description={currentUser.displayName}
               />
               </MapView>
-            }
-            {!location && !region &&
-            <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-              <Text>Turn On Your Location Services On High AccuracyAnd If It Is Already On Try Reloading App</Text>
-            </View>
             }
           </View>
     );

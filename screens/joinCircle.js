@@ -12,8 +12,7 @@ import {
         Button
         } from 'react-native-paper';
 import firebase from '../config/firebase'
-import { dbRef,fbAppId,uid } from '../constants/constants'
-    
+import { dbRef,fbAppId,uid } from '../constants/constants'    
 
 export default class JoinCircle extends React.Component {
   constructor(props){
@@ -37,22 +36,25 @@ export default class JoinCircle extends React.Component {
     })
     //fetching circles
     {        
-        fetch(`${dbRef}/circles.json`)
-        .then(data => {
-            return data.json();
-        })
-        .then(data2 => {
-            const {uid} = this.state
-            const arr = [];
-            for(let i in data2){
-                data2[i].key=i;
-                if(!data2[i].members.includes(uid)){
-                    arr.push(data2[i])
-                }
+        const database = firebase.database();
+        const circleRef = database.ref('circles');
+        let arr = []
+        circleRef
+        .on('value', (snap)=>{
+          const {uid} = this.state
+          let { circles } = this.state
+          circles =[];
+          data = snap.val()
+          arr = [];
+          for(let i in data){
+            data[i].key=i;
+            if(!data[i].members.includes(uid)){
+                arr.push(data[i])
             }
-            this.setState({
-                circles : arr,
-            }) 
+          }
+          this.setState({
+            circles : arr,
+        }) 
         })
     }    
 }
@@ -62,20 +64,19 @@ export default class JoinCircle extends React.Component {
         let circle = null;
         circles.map((value,index)=>{
             if(value.code == code){
-                circle = value                
+                circle = value   
+                const database = firebase.database();
+                circle.members.push(uid)
+                database.ref(`circles/${circle.key}`).update({ members: circle.members })
+                .then(
+                    ()=>{
+                        this.props.navigation.navigate("Home",uid)
+                    }
+                )             
             }else{
                 alert(`Wrong Code`)
             }
         })
-        const database = firebase.database();
-        circle.members.push(uid)
-        database.ref(`circles/${circle.key}`).update({ members: circle.members })
-        .then(
-            ()=>{
-                this.props.navigation.navigate("Home",uid)
-            }
-        )
-
     }
 
 render() {

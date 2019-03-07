@@ -57,7 +57,6 @@ export default class createCircle extends React.Component {
     }
 
 render() {
-    console.log(this.state)
     return (
         <View style={{flex: 1}}>
             <Appbar.Header>

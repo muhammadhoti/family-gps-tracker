@@ -9,6 +9,7 @@ import MyCircles from '../screens/myCircles'
 import Circle from '../screens/circle'
 import JoinCircle from '../screens/joinCircle'
 import TrackCircle from '../screens/trackCircles'
+import TrackingScreen from '../screens/trackingScreen'
 
 class Navigator extends React.Component {
 
@@ -74,6 +75,9 @@ const AppNavigator = createStackNavigator({
   },
   Circle : {
       screen : Circle
+  },
+  Tracking_Screen : {
+    screen : TrackingScreen
   }
 });
 
