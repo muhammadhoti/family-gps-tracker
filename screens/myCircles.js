@@ -13,7 +13,7 @@ import {
         Button
         } from 'react-native-paper';
 import firebase from '../config/firebase'
-import { dbRef,fbAppId,uid } from '../constants/constants'
+import { dbRef,fbAppId } from '../constants/constants'
     
 
 export default class MyCircle extends React.Component {
@@ -37,26 +37,28 @@ export default class MyCircle extends React.Component {
     uid : this.props.navigation.state.params.uid
     })
     //fetching circles
-    {        
-        fetch(`${dbRef}/circles.json`)
-        .then(data => {
-            return data.json();
-        })
-        .then(data2 => {
-            const {uid} = this.state
-            const arr = [];
-            for(let i in data2){
-                data2[i].key=i;
-                if(data2[i].members.includes(uid)){
-                    arr.push(data2[i])
-                }
-                if(data2[i].owner === uid){
-                    data2[i].isOwner = true
-                }
+    {
+        const database = firebase.database();
+        const circleRef = database.ref('circles');
+        let arr = []
+        circleRef
+        .on('value', (snap)=>{
+          const {uid} = this.state
+          let{currentUserCircles} = this.state
+          currentUserCircles =[];
+          data = snap.val()
+          arr = [];
+          for(let i in data){
+            data[i].key=i;
+            if(data[i].members.includes(uid)){
+                arr.push(data[i])
+            }if(data[i].owner === uid){
+                data[i].isOwner = true
             }
-            this.setState({
-                currentUserCircles : arr,
-            }) 
+          }
+          this.setState({
+            currentUserCircles : arr,
+        }) 
         })
     }    
 }

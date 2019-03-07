@@ -14,7 +14,7 @@ import {
         Headline,
         } from 'react-native-paper';
 import firebase from '../config/firebase'
-import { dbRef,fbAppId,uid } from '../constants/constants'
+import { dbRef } from '../constants/constants'
 import _ from 'lodash';
     
 
@@ -42,16 +42,18 @@ export default class Circle extends React.Component {
     })
 
     //fetching users
-    {        
-        fetch(`${dbRef}/userInfo.json`)
-        .then(data => {
-            return data.json();
-        })
-        .then(data2 => {
-            const arr = [];
-            for(let i in data2){
-                data2[i].key=i;
-                arr.push(data2[i])
+    {
+        const database = firebase.database();
+          const userRef = database.ref('userInfo');
+          let arr = []
+          userRef
+          .on('value', (snap)=>{
+            userInfo =[];
+            data = snap.val()
+            arr = [];
+            for(let i in data){
+              data[i].key = i;
+              arr.push(data[i])
             }
             const admin = _.find(arr, {
                 uid: circle.owner
@@ -60,7 +62,7 @@ export default class Circle extends React.Component {
                 userInfo : arr,
                 admin : admin
             }) 
-        })
+          })
     }    
 }
 
@@ -80,7 +82,6 @@ leaveCircle(value){
     const database = firebase.database();
     const index=value.members.indexOf(uid)
     const updatedArray = value.members.splice(index,1);
-    console.log(value.members)
     database.ref(`circles/${value.key}`).update({ members: value.members })
     .then(
         ()=>{
@@ -107,7 +108,6 @@ render() {
                 const renderingUser = _.find(userInfo, {
                     uid: value
                 });
-                console.log(value)
                 return(
                     <TouchableOpacity>
                         {renderingUser &&
