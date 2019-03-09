@@ -43,7 +43,6 @@ export default class JoinCircle extends React.Component {
         .on('value', (snap)=>{
           const {uid} = this.state
           let { circles } = this.state
-          circles =[];
           data = snap.val()
           arr = [];
           for(let i in data){
@@ -61,22 +60,25 @@ export default class JoinCircle extends React.Component {
 
     joinCircle(){
         const {code,circles,uid} = this.state;
-        let circle = null;
+        let WrongCode = true;
         circles.map((value,index)=>{
             if(value.code == code){
-                circle = value   
+                circle = value
+                WrongCode = false;   
                 const database = firebase.database();
                 circle.members.push(uid)
                 database.ref(`circles/${circle.key}`).update({ members: circle.members })
                 .then(
                     ()=>{
+                      this.setState({code:""})
                         this.props.navigation.navigate("Home",uid)
                     }
                 )             
-            }else{
-                alert(`Wrong Code`)
             }
         })
+        if(WrongCode){
+          alert("Wrong Code !")
+        }
     }
 
 render() {

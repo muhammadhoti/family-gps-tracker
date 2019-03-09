@@ -100,11 +100,14 @@ locationChanged = async (location) => {
   }
   this.setState({location, region})
   const database = firebase.database();
+  let date = Date();
+      date = date.split("G",1)
     let coordinates = {
       longitude : location.coords.longitude,
       latitude : location.coords.latitude
     }
   await KEY && database.ref(`userInfo/${KEY}`).update({coordinates:coordinates})
+  await KEY && database.ref(`userInfo/${KEY}`).update({lastSeen:date[0]})
 }
 
 
@@ -141,11 +144,13 @@ render() {
             }
             {
             location && region && currentUser &&
-            <View>
+            <View style={{
+              flex: 1
+              }}>
                 <MapView 
                 style={{
-                flex: 1
-                }}
+                  flex: 1
+                  }}
                 initialRegion={region}>
                 <MapView.Marker
                     coordinate={{
@@ -154,9 +159,17 @@ render() {
                     }}
                     image={currentUser.displayPicture}
                     description={currentUser.displayName}
-                />
+                >
+                  <MapView.Callout>
+                    <View style={{alignItems: 'center',justifyContent: 'center'}}>
+                        <Text style={{fontWeight: 'bold'}}>{currentUser.displayName}</Text>
+                        <Text>{`Last Seen : ${currentUser.lastSeen}`}</Text>
+                    </View>
+                  </MapView.Callout>
+                </MapView.Marker>
                 {selectedMembers && selectedMembers.map(
                     (value,index)=>{
+                      console.log("value *******",value)
                         return(
                             <MapView.Marker
                             coordinate={{
@@ -165,7 +178,14 @@ render() {
                             }}
                             image={value.displayPicture}
                             description={value.displayName}
-                            />
+                            >
+                              <MapView.Callout>
+                                <View style={{alignItems: 'center',justifyContent: 'center'}}>
+                                    <Text style={{fontWeight: 'bold'}}>{value.displayName}</Text>
+                                    <Text>{`Last Seen : ${value.lastSeen}`}</Text>
+                                </View>
+                              </MapView.Callout>  
+                            </MapView.Marker>
                         )
                     }
                 )

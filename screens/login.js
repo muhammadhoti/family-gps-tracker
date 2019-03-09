@@ -8,7 +8,7 @@ export default class Login extends React.Component {
   constructor(props){
     super(props)
     this.state={
-        
+      usersList:[],
     }
   }
   
@@ -20,9 +20,8 @@ export default class Login extends React.Component {
           .on('value', (snap)=>{
             data = snap.val()
             for(let i in data){
-              arr.push(data[i].uid);
+              this.state.usersList.push(data[i].uid);
             }
-            this.setState({usersList:arr})
           })
     }
   

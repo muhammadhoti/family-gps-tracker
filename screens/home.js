@@ -92,6 +92,8 @@ locationChanged = async (location) => {
 
 
 _getLocationAsync = async () => {
+    let date = Date();
+    date = date.split("G",1)
     const database = firebase.database();
     let { status } = await Permissions.askAsync(Permissions.LOCATION);
     const locationSerivceCheck = await Location.hasServicesEnabledAsync();
@@ -104,11 +106,13 @@ _getLocationAsync = async () => {
           latitude : location.coords.latitude
         }
        await KEY && database.ref(`userInfo/${KEY}`).update({coordinates:coordinates})
+       await KEY && database.ref(`userInfo/${KEY}`).update({lastSeen:date[0]})
     }
   };
 
 render() {
   const {currentUser,location,region} = this.state;
+  
   return (
         <View style={{
             flex: 1
@@ -137,7 +141,14 @@ render() {
                 }}
                 image={currentUser.displayPicture}
                 description={currentUser.displayName}
-              />
+                >
+                <MapView.Callout>
+                <View style={{alignItems: 'center',justifyContent: 'center'}}>
+                    <Text style={{fontWeight: 'bold'}}>{currentUser.displayName}</Text>
+                    <Text>{`Last Seen : ${currentUser.lastSeen}`}</Text>
+                </View>
+                </MapView.Callout>  
+              </MapView.Marker>
               </MapView>
             }
           </View>
