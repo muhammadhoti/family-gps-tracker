@@ -3,6 +3,8 @@ import { StyleSheet, Text, View, Button } from 'react-native';
 import firebase from '../config/firebase';
 import {AsyncStorage} from 'react-native';
 import { dbRef,fbAppId,uid } from '../constants/constants'
+import { Notifications, Permissions } from 'expo'
+let DEVICE_TOKEN;
 
 export default class Login extends React.Component {
   constructor(props){
@@ -10,6 +12,7 @@ export default class Login extends React.Component {
     this.state={
       usersList:[],
     }
+    this.deviceToken = this.deviceToken.bind(this)
   }
   
     componentDidMount(){
@@ -23,6 +26,7 @@ export default class Login extends React.Component {
               this.state.usersList.push(data[i].uid);
             }
           })
+          this.deviceToken();
     }
   
     async login() {
@@ -50,19 +54,25 @@ export default class Login extends React.Component {
           const uid = await userData.uid
           if(usersList){
           const userCheck = await usersList.includes(uid)
-          await userCheck ? this.props.navigation.navigate("Home",{uid})
+          await userCheck 
+          ? 
+          this.props.navigation.navigate("Home",{uid:uid,token,DEVICE_TOKEN})
            :
             newUserRef.set({
                 displayName : userData.displayName,
                 email : userData.email,
                 displayPicture : userData.photoURL,
-                uid : userData.uid
+                uid : userData.uid,
+                token : this.state.token
             })
             .then(()=>{
                 userListRef.set({uid})
             })
             .then(
-                ()=>{this.props.navigation.navigate("Home",uid)}
+                ()=>{
+                  console.log(DEVICE_TOKEN)
+                  this.props.navigation.navigate("Home",uid)
+                }
             )
           return Promise.resolve({type: 'success'});
           }
@@ -74,6 +84,24 @@ export default class Login extends React.Component {
         }
       }
     }
+
+  async deviceToken(){
+    const { status: existingStatus } = await Permissions.getAsync(
+      Permissions.NOTIFICATIONS
+    );
+    let finalStatus = existingStatus;
+    if (existingStatus !== 'granted') {
+      const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+      finalStatus = status;
+    }
+    if (finalStatus !== 'granted') {
+      return;
+    }
+    let token = await Notifications.getExpoPushTokenAsync();
+    this.setState({token: token})
+    DEVICE_TOKEN = token
+    return 
+  }
 
   render() {
     return (

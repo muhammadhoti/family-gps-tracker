@@ -45,12 +45,14 @@ export default class TrackingScreen extends React.Component {
     const uid = this.props.navigation.state.params.uid
     const name = this.props.navigation.state.params.circle.name
     const members = this.props.navigation.state.params.circle.members
+    const tokens = this.props.navigation.state.params.circle.tokens
     const owner = this.props.navigation.state.params.circle.owner
         this.setState({
           uid : uid,
           name :name,
           members :members,
-          owner : owner
+          owner : owner,
+          tokens : tokens
         })
         
         {
@@ -126,6 +128,31 @@ _getLocationAsync = async () => {
        await KEY && database.ref(`userInfo/${KEY}`).update({coordinates:coordinates})
     }
   };
+
+emergencyAlert(){
+  fetch('https://exp.host/--/api/v2/push/send', {
+	mode: 'no-cors',
+    method: 'POST',
+    headers: {
+    	"Accept":'application/json',
+		"Content-Type": 'application/json'
+        },
+	body: JSON.stringify({
+    to: "ExponentPushToken[a3Nvx_GY6sc0IZhzK6Fqup]", body: "Emergency ALert",title:`${this.state.name}`
+  })
+});
+fetch('https://exp.host/--/api/v2/push/send', {
+	mode: 'no-cors',
+    method: 'POST',
+    headers: {
+    	"Accept":'application/json',
+		"Content-Type": 'application/json'
+        },
+	body: JSON.stringify({
+    to: "ExponentPushToken[xIPN9PLs7wIry5VenF1imZ]", body: "Emergency ALert",title:`${this.state.name}`
+  })
+});
+}
 
 render() {
   const {currentUser,selectedMembers,location,region,admin,name} = this.state;
@@ -215,6 +242,11 @@ render() {
               <Headline>Turn On Your Location Services On High Accuracy And If It Is Already On GO Back And Try Tracking Circle</Headline>
             </View>
             }
+            <View >
+                  <Button color='red' mode="contained" onPress={() => this.emergencyAlert() }>
+                    Emergency ALert !
+                  </Button>
+            </View>
           </View>
     );
   }

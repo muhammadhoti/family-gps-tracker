@@ -12,7 +12,9 @@ import {
         Button
         } from 'react-native-paper';
 import firebase from '../config/firebase'
-import { dbRef,fbAppId,uid } from '../constants/constants'    
+import { dbRef,fbAppId,uid } from '../constants/constants'
+import { Notifications, Permissions } from 'expo'
+let DEVICE_TOKEN;    
 
 export default class JoinCircle extends React.Component {
   constructor(props){
@@ -32,7 +34,7 @@ export default class JoinCircle extends React.Component {
   componentDidMount(){
     //Getting Uid From Props
     this.setState({
-    uid : this.props.navigation.state.params.uid
+    uid : this.props.navigation.state.params.uid,
     })
     //fetching circles
     {        
@@ -55,8 +57,26 @@ export default class JoinCircle extends React.Component {
             circles : arr,
         }) 
         })
-    }    
+    }
 }
+
+// async deviceToken(){
+//   const { status: existingStatus } = await Permissions.getAsync(
+//     Permissions.NOTIFICATIONS
+//   );
+//   let finalStatus = existingStatus;
+//   if (existingStatus !== 'granted') {
+//     const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+//     finalStatus = status;
+//   }
+//   if (finalStatus !== 'granted') {
+//     return;
+//   }
+//   let token = await Notifications.getExpoPushTokenAsync();
+//   this.setState({token: token})
+//   DEVICE_TOKEN = token
+//   return 
+// }
 
     joinCircle(){
         const {code,circles,uid} = this.state;
@@ -67,7 +87,7 @@ export default class JoinCircle extends React.Component {
                 WrongCode = false;   
                 const database = firebase.database();
                 circle.members.push(uid)
-                database.ref(`circles/${circle.key}`).update({ members: circle.members })
+                database.ref(`circles/${circle.key}`).update({ members: circle.members})
                 .then(
                     ()=>{
                       this.setState({code:""})

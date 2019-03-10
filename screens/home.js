@@ -18,8 +18,8 @@ import {
   TextInput,
   Button
   } from 'react-native-paper';
+import { Notifications } from 'expo'
 var KEY;
-const GEOLOCATION_OPTIONS = { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 };
 
 export default class Maps extends React.Component {
   constructor(props){
@@ -28,7 +28,7 @@ export default class Maps extends React.Component {
       
     }
     this._getLocationAsync = this._getLocationAsync.bind(this)
-    // this.locationChanged = this.locationChanged.bind(this)
+    this.deviceToken = this.deviceToken.bind(this)
   }  
 
   static navigationOptions = {
@@ -71,24 +71,28 @@ export default class Maps extends React.Component {
               this._getLocationAsync();
           }
         }
-        // await Location.watchPositionAsync(GEOLOCATION_OPTIONS, this.locationChanged);
+        this.deviceToken();
 }
 
-locationChanged = async (location) => {
-  region = {
-    latitude: location.coords.latitude,
-    longitude: location.coords.longitude,
-    latitudeDelta: 0.1,
-    longitudeDelta: 0.05,
+async deviceToken(){
+  const database = firebase.database()
+  const { status: existingStatus } = await Permissions.getAsync(
+    Permissions.NOTIFICATIONS
+  );
+  let finalStatus = existingStatus;
+  if (existingStatus !== 'granted') {
+    const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+    finalStatus = status;
   }
-  this.setState({location, region})
-  const database = firebase.database();
-    let coordinates = {
-      longitude : location.coords.longitude,
-      latitude : location.coords.latitude
-    }
-  await KEY && database.ref(`userInfo/${KEY}`).update({coordinates:coordinates})
+  if (finalStatus !== 'granted') {
+    return;
+  }
+  let token = await Notifications.getExpoPushTokenAsync();
+  this.setState({token: token})
+  KEY && token && database.ref(`userInfo/${KEY}`).update({token:token})
+  return 
 }
+
 
 
 _getLocationAsync = async () => {
