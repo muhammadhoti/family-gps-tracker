@@ -2,9 +2,9 @@
   "packagerPort": null,
   "packagerPid": null,
   "expoServerPort": null,
-  "expoServerNgrokUrl": "https://xi-hk6.muhammadhoti.batch-5-final-hackathon.exp.direct",
-  "packagerNgrokUrl": "https://packager.xi-hk6.muhammadhoti.batch-5-final-hackathon.exp.direct",
-  "ngrokPid": 5968,
+  "expoServerNgrokUrl": null,
+  "packagerNgrokUrl": null,
+  "ngrokPid": null,
   "devToolsPort": 19002,
   "webpackServerPort": null
 }

@@ -12,38 +12,33 @@ import TrackCircle from '../screens/trackCircles'
 import TrackingScreen from '../screens/trackingScreen'
 
 class Navigator extends React.Component {
-
-
-
-
   render() {
     return (
-        <View style={{flex: 1,backgroundColor:'blue'}}>
-          <Navigation />
-        </View>
+      <View style={{flex: 1,backgroundColor:'blue'}}>
+        <Navigation />
+      </View>
     );
   }
 }
 
 const MyDrawerNavigator = createDrawerNavigator(
-    {
-      Home: {
-        screen: Home,
-      },
-      My_Circles : {
-          screen : MyCircles
-      },
-      Track_Circles : {
-        screen : TrackCircle
-      },
-      Create_Circle : {
-        screen : CreateCircle
-      },
-      Join_Circle : {
-        screen : JoinCircle
-      },
-    });
-    
+  {
+    Home: {
+      screen: Home,
+    },
+    My_Circles : {
+      screen : MyCircles
+    },
+    Track_Circles : {
+      screen : TrackCircle
+    },
+    Create_Circle : {
+      screen : CreateCircle
+    },
+    Join_Circle : {
+      screen : JoinCircle
+    },
+  });
 
 const AppNavigator = createStackNavigator({
   Login: {
@@ -52,29 +47,29 @@ const AppNavigator = createStackNavigator({
   Home:{
     screen : MyDrawerNavigator,
     navigationOptions: ({ navigation }) => ({
-        headerStyle: {
-          backgroundColor: '#505050',
-        },
-        headerLeft: (
-          <IconButton
-            icon='menu'
-            color='white'
-            size={25}
-            onPress={() => navigation.toggleDrawer()}
-          />
-        ),
-        headerRight: (
-          <IconButton
-            icon="exit-to-app"
-            color='#e833e5'
-            size={25}
-            onPress={() => navigation.navigate('Login')}
-          />
-        )
-      }),
+      headerStyle: {
+        backgroundColor: '#505050',
+      },
+      headerLeft: (
+        <IconButton
+          icon='menu'
+          color='white'
+          size={25}
+          onPress={() => navigation.toggleDrawer()}
+        />
+      ),
+      headerRight: (
+        <IconButton
+          icon="exit-to-app"
+          color='#e833e5'
+          size={25}
+          onPress={() => navigation.navigate('Login')}
+        />
+      )
+    }),
   },
   Circle : {
-      screen : Circle
+    screen : Circle
   },
   Tracking_Screen : {
     screen : TrackingScreen
