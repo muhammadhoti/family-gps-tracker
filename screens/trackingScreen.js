@@ -126,19 +126,19 @@ export default class TrackingScreen extends React.Component {
   };
 
   emergencyAlert(){
-    const { tokens } = this.state
+    const { tokens,currentUser } = this.state
     tokens.map((value)=>{
       fetch('https://exp.host/--/api/v2/push/send', {
         mode: 'no-cors',
         method: 'POST',
         headers: {
-          "Accept":'application/json',
-          "Content-Type": 'application/json'
+        "Accept":'application/json',
+        "Content-Type": 'application/json'
         },
         body: JSON.stringify({
-        to: value, body: "Emergency ALert",title:`${this.state.name}`
+        to: value, body: `Emergency Alert By ${currentUser.displayName}`,title:`${this.state.name}`
         })
-      });  
+      }); 
     })
   }
 
